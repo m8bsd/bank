@@ -1,40 +1,59 @@
-# Makefile for Lightweight C CMS with SQLite
-# Target: FreeBSD ARM (Raspberry Pi, ARMv8, etc.)
+# ==============================
+# Config
+# ==============================
+TOKEN := TOKEN HERE
+TAG   := TAG NAME HERE
+API   := https://api.digitalocean.com/v2
 
-# -----------------------------
-# Compiler settings
-# -----------------------------
-CC = cc                # FreeBSD default C compiler (Clang usually)
-CFLAGS = -Wall -g -O2  # -Wall: warnings, -g: debug symbols, -O2: optimization
+AUTH  := -H "Authorization: Bearer $(TOKEN)" -H "Content-Type: application/json"
 
-# Libraries to link (SQLite is required)
-LIBS = -lsqlite3
-
-# Executable name
-TARGET = cms
-
-# Source files
-SRC = main.c db.c
-
-# -----------------------------
+# ==============================
 # Targets
-# -----------------------------
+# ==============================
 
-# Default target: build executable
-all:
-	@echo "Compiling for FreeBSD ARM..."
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LIBS)
-	@echo "Build complete! Run './$(TARGET)' to start the CMS."
+all: cleanup snapshots
 
-# Run directly after build
-run: all
-	./$(TARGET)
+# ------------------------------
+# List droplets by tag
+# ------------------------------
+droplets:
+	curl -s $(AUTH) "$(API)/droplets?tag_name=$(TAG)" | jq .
 
-# Clean build files
-clean:
-	rm -f $(TARGET)
-	@echo "Clean complete! Executable removed."
+# ------------------------------
+# List snapshots
+# ------------------------------
+snapshots-list:
+	curl -s $(AUTH) "$(API)/snapshots?resource_type=droplet" | jq .
 
-# Cross compile for ARM (optional)
-# Example: target aarch64 FreeBSD on ARM
-# CC=aarch64-unknown-freebsd-clang make
+# ------------------------------
+# Delete old snapshots
+# ------------------------------
+cleanup:
+	@echo "Checking snapshots..."
+	@curl -s $(AUTH) "$(API)/snapshots?resource_type=droplet" | \
+	jq -c '.snapshots[]' | while read snap; do \
+		ID=$$(echo $$snap | jq -r '.id'); \
+		NAME=$$(echo $$snap | jq -r '.name'); \
+		CREATED=$$(echo $$snap | jq -r '.created_at'); \
+		DAY=$$(date -d $$CREATED +%a); \
+		DIFF=$$(echo $$(( ( $$(date +%s) - $$(date -d $$CREATED +%s) ) / 86400 ))); \
+		if [ "$$DAY" != "Fri" ] || { [ "$$DAY" = "Fri" ] && [ $$DIFF -ge 7 ]; }; then \
+			echo "Deleting snapshot $$NAME ($$ID) created $$CREATED"; \
+			curl -s -X DELETE $(AUTH) "$(API)/snapshots/$$ID" > /dev/null; \
+		fi; \
+	done
+
+# ------------------------------
+# Snapshot all droplets
+# ------------------------------
+snapshots:
+	@echo "Backing up droplets..."
+	@curl -s $(AUTH) "$(API)/droplets?tag_name=$(TAG)" | \
+	jq -c '.droplets[]' | while read droplet; do \
+		ID=$$(echo $$droplet | jq -r '.id'); \
+		NAME=$$(echo $$droplet | jq -r '.name'); \
+		echo "Creating snapshot for $$NAME ($$ID)"; \
+		curl -s -X POST $(AUTH) \
+			-d '{"type":"snapshot"}' \
+			"$(API)/droplets/$$ID/actions" > /dev/null; \
+	done
