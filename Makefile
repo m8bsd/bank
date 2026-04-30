@@ -1,6 +1,5 @@
 # DigitalOcean Droplet Snapshot Backup
-# Converted from PHP to Makefile by Claude
-# Original by: Abdulmogeeb AlHumaid - abdulmogeeb@gmail.com
+# Original by: Michael
 # Licence: nothing, just use it and enjoy it.
 #
 # Usage:
