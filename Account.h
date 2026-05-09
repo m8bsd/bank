@@ -1,7 +1,3 @@
-//
-// Created by 0xboz on 8/24/19.
-//
-
 #ifndef CPP_BANKING_SYSTEM_ACCOUNT_H
 #define CPP_BANKING_SYSTEM_ACCOUNT_H
 
