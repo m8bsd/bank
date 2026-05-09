@@ -1,7 +1,3 @@
-//
-// Created by 0xboz on 8/24/19.
-//
-
 #include "Account.h"
 #include <iostream>
 #include <fstream>
