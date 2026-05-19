@@ -1,6 +1,6 @@
 # 🏦 Simple Banking System — PHP
 
-A CLI-based banking system written in PHP, converted from the original [C++ project](https://github.com/m8bsd/bank) by m8bsd.
+A CLI-based banking system written in PHP.
 
 ---
 
@@ -148,12 +148,6 @@ We hope to see you soon! Bye!
 └── bank_ledger.txt   # Auto-generated data file (do not delete while running)
 ```
 
----
-
-## Original Project
-
-This is a PHP port of the C++ banking system at:
-**https://github.com/m8bsd/bank**
 
 ---
 
