@@ -1,7 +1,8 @@
-### A Simple Banking System Written in PHP
-Build A Simple Banking System in PHP
+### A Simple Banking System Written in JAVA
+Build A Simple Banking System in JAVA
 
 ### To run it:
 ```
-php bank.php
+javac Bank.java
+java Bank
 ```
