@@ -3,6 +3,6 @@ Build A Simple Banking System in JAVA
 
 ### To run it:
 ```
-javac Bank.java
-java Bank
+javac main.java
+java main
 ```
